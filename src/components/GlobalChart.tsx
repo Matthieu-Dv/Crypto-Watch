@@ -7,6 +7,7 @@ interface CoinsData {
 
 const GlobalChart: React.FC<CoinsData> = ({ coinsData }) => {
   const [dataArray, setDataArray] = useState([]);
+
   const rootStyles = getComputedStyle(document.documentElement);
 
   const green1 = rootStyles.getPropertyValue('--green1').trim();
