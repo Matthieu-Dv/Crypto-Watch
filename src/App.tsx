@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import HeaderInfos from './components/HeaderInfos';
 import GlobalChart from './components/GlobalChart';
 import axios from 'axios';
@@ -15,14 +15,24 @@ const App = () => {
       )
       .then((res) => setCoinsData(res.data));
 
-    window.addEventListener('scroll', () => {
-      if (window.scrollY > 145) {
-        document.querySelector('.table-header').classList.add('active');
-      } else {
-        document.querySelector('.table-header').classList.remove('active');
+    const handleScroll = () => {
+      const tableHeader = document.querySelector('.table-header');
+      if (tableHeader) {
+        if (window.scrollY > 145) {
+          tableHeader.classList.add('active');
+        } else {
+          tableHeader.classList.remove('active');
+        }
       }
-    });
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll); // Nettoyage
+    };
   }, []);
+
   return (
     <>
       <div className="app-container">

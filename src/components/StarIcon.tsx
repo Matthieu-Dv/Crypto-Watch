@@ -1,19 +1,25 @@
 import React, { useEffect, useState } from 'react';
 
-const StarIcon: React.FC = ({ coinId }) => {
-  const [like, setLike] = useState(false);
+interface StarIconProps {
+  coinId: string; // Typage pour la prop coinId
+}
+
+const StarIcon: React.FC<StarIconProps> = ({ coinId }) => {
+  const [like, setLike] = useState<boolean>(false);
 
   useEffect(() => {
     if (window.localStorage.coinList) {
-      let favList = window.localStorage.coinList.split(',');
+      const favList = window.localStorage.coinList.split(',');
       if (favList.includes(coinId)) {
         setLike(true);
+      } else {
+        setLike(false);
       }
     }
-  });
+  }, [coinId]);
 
-  const idChecker = (id) => {
-    let favList = null;
+  const idChecker = (id: string): void => {
+    let favList: string[] | null = null;
 
     if (window.localStorage.coinList) {
       favList = window.localStorage.coinList.split(',');
@@ -21,13 +27,18 @@ const StarIcon: React.FC = ({ coinId }) => {
 
     if (favList) {
       if (favList.includes(id)) {
-        window.localStorage.coinList = favList.filter((coin) => coin !== id);
+        // Retirer l'ID de la liste
+        window.localStorage.coinList = favList
+          .filter((coin) => coin !== id)
+          .join(',');
         setLike(false);
       } else {
-        window.localStorage.coinList = [...favList, coinId];
+        // Ajouter l'ID à la liste
+        window.localStorage.coinList = [...favList, coinId].join(',');
         setLike(true);
       }
     } else {
+      // Créer une nouvelle liste si aucune n'existe
       window.localStorage.coinList = coinId;
       setLike(true);
     }
@@ -38,6 +49,7 @@ const StarIcon: React.FC = ({ coinId }) => {
       onClick={() => idChecker(coinId)}
       src={like ? './assets/star-full.svg' : './assets/star-empty.svg'}
       alt="icon-star"
+      style={{ cursor: 'pointer' }}
     />
   );
 };

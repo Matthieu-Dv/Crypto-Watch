@@ -1,12 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import { Tooltip, Treemap } from 'recharts';
 
-interface CoinsData {
-  coinsData: number | null;
+interface Coin {
+  symbol: string;
+  market_cap: number;
+  market_cap_change_percentage_24h: number;
 }
 
-const GlobalChart: React.FC<CoinsData> = ({ coinsData }) => {
-  const [dataArray, setDataArray] = useState([]);
+interface CoinsDataProps {
+  coinsData: Coin[]; // coinsData est un tableau d'objets de type Coin
+}
+
+interface ChartData {
+  name: string;
+  size: number;
+  fill: string;
+}
+
+interface TooltipPayload {
+  name: string;
+}
+
+interface TreemapTooltipProps {
+  active?: boolean;
+  payload?: { payload: TooltipPayload }[];
+}
+
+const GlobalChart: React.FC<CoinsDataProps> = ({ coinsData }) => {
+  const [dataArray, setDataArray] = useState<ChartData[]>([]);
 
   const rootStyles = getComputedStyle(document.documentElement);
 
@@ -17,7 +38,7 @@ const GlobalChart: React.FC<CoinsData> = ({ coinsData }) => {
   const red2 = rootStyles.getPropertyValue('--red2').trim();
   const black2 = rootStyles.getPropertyValue('--black2').trim();
 
-  const colorPicker = (number) => {
+  const colorPicker = (number: number): string => {
     if (number >= 20) {
       return colors1;
     } else if (number >= 5) {
@@ -33,22 +54,12 @@ const GlobalChart: React.FC<CoinsData> = ({ coinsData }) => {
     }
   };
 
-  const excludeCoin = (coin) => {
-    if (
-      coin === 'usdt' ||
-      coin === 'usdc' ||
-      coin === 'busd' ||
-      coin === 'dai' ||
-      coin === 'ust' ||
-      coin === 'mim'
-    ) {
-      return false;
-    } else {
-      return true;
-    }
+  const excludeCoin = (coin: string): boolean => {
+    return !['usdt', 'usdc', 'busd', 'dai', 'ust', 'mim'].includes(coin);
   };
+
   useEffect(() => {
-    let chartData = [];
+    const chartData: ChartData[] = [];
 
     if (coinsData.length > 0) {
       for (let i = 0; i < 45; i++) {
@@ -60,7 +71,7 @@ const GlobalChart: React.FC<CoinsData> = ({ coinsData }) => {
               coinsData[i].market_cap_change_percentage_24h.toFixed(1) +
               '%',
             size: coinsData[i].market_cap,
-            fill: colorPicker(coinsData[i].price_change_percentage_24h),
+            fill: colorPicker(coinsData[i].market_cap_change_percentage_24h),
           });
         }
       }
@@ -68,7 +79,10 @@ const GlobalChart: React.FC<CoinsData> = ({ coinsData }) => {
     setDataArray(chartData);
   }, [coinsData]);
 
-  const TreemapToolTip = ({ active, payload }) => {
+  const TreemapToolTip: React.FC<TreemapTooltipProps> = ({
+    active,
+    payload,
+  }) => {
     if (active && payload && payload.length) {
       return (
         <div className="custom-tooltip">
@@ -78,6 +92,7 @@ const GlobalChart: React.FC<CoinsData> = ({ coinsData }) => {
     }
     return null;
   };
+
   return (
     <div className="global-chart">
       <Treemap
@@ -87,7 +102,7 @@ const GlobalChart: React.FC<CoinsData> = ({ coinsData }) => {
         dataKey="size"
         stroke="rgb(51,51,51)"
         fill="black"
-        aspectRatio="1"
+        aspectRatio={1}
       >
         <Tooltip content={<TreemapToolTip />} />
       </Treemap>
